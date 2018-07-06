@@ -1,0 +1,206 @@
+<!doctype html>
+<html>
+
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+            crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/handsontable/3.0.0/handsontable.min.css">
+        <style>
+        </style>
+        <title>Test</title>
+        <script src="https://sdk.amazonaws.com/js/aws-sdk-2.248.1.min.js"></script>
+    </head>
+
+    <body>
+        <div class="container">
+            <br />
+            <div class="row">
+                <div class="col">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" placeholder="Name" aria-label="Name" aria-describedby="test-name-label" id="test-name">
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="test-name-label">.js</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                        <!-- js-test-list will be populated asynchronously -->
+                        <div id="js-test-list">
+                            <h4>Loading tests...</h4>
+                        </div>
+                    </div>
+
+                <div class="col">
+                    <button type="button" class="btn btn-outline-success submit-button">Submit</button>
+                </div>
+                    <br />
+                <div class="col">
+                    <button type="button" class="btn btn-outline-info help-button" data-toggle="modal" data-target="#help-modal">Help</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="comment">Code:</label>
+                        <textarea class="form-control" rows="23" id="code-input"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <pre><code id="code-preview">codePreview()</code></pre>
+                </div>
+            </div>
+            <br />
+
+            <!-- Button trigger modal -->
+
+
+            <!-- Modal -->
+            <div class="modal fade" id="help-modal" tabindex="-1" role="dialog" aria-labelledby="help-modal-title" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="help-modal-title">Help</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <h4>
+                                <em>Notes</em>
+                            </h4>
+                            <ul class="list-group">
+                                <li class="list-group-item">This will be a list of notes</li>
+                            </ul>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <!-- Syntax highlighting -->
+    <!-- <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"> -->
+    <link rel="stylesheet" href="https://highlightjs.org/static/demo/styles/atelier-cave-light.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+    <!-- getting previous tests -->
+    <script async>
+        (async () => {
+            // api call to get the configs
+            const apiUrl = 'https://zdzwc628de.execute-api.us-west-2.amazonaws.com/v1/tests'; 
+            // Hoist our configs all the way up to the global scope like the hooligans we're forced to be
+            // will be an array of objects containing rows from database
+            const jsTestList = await fetch(apiUrl).then(res => res.json());
+            // console.log(jsTestList)
+            // populate our list
+            const jsTestDropdown = jsTestList.map(test => test.split('tests/')[1]).filter(test => test).map(test => {
+                return (`<button class="dropdown-item" type="button" onClick="loadTest('${test}')">${test}</button>`)
+            }).join('')
+            // set our div to hold our dropdown
+            document.querySelector('#js-test-list').innerHTML = `
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Dropdown button
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    ${jsTestDropdown}        
+                    </div>
+                </div>`
+        })()
+    </script>
+
+    <script>
+        AWS.config.update({
+                // credentials: new AWS.CognitoIdentityCredentials({
+                //     IdentityPoolId: 'us-west-2_hhLMG8LIc'
+                // })
+                "accessKeyId": "AKIAJNY2XGYEQAUYGTTQ",
+                "secretAccessKey": "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",
+                "region": "us-west-2"
+            })
+
+        const codeInput = document.querySelector('#code-input');
+        const codePreview = document.querySelector('#code-preview');
+        // highlighting takes a bit to complete, so only do it on an interval
+        setInterval(() => {
+            if (codePreview.innerHTML) {
+                codePreview.innerHTML = hljs.highlight('js', codeInput.value.toString()).value
+            }
+        }, 2500)
+
+        // on input change, update our <code> tag
+        codeInput.addEventListener('input', (e) => {
+            codePreview.innerHTML = codeInput.value.toString()
+        })
+
+
+        async function loadTest(test) {
+            
+            // get specific config
+            const s3Params = {
+                Bucket: 'canary-upload',
+                Key: 'tests/' + test
+            }
+
+            const loadedTest = await new AWS.S3().getObject(s3Params).promise().then(res => res.Body.toString());
+
+            codeInput.value = JSON.parse(loadedTest);
+        } // loadTest
+
+        document.querySelector('.submit-button').addEventListener('click', async () => {
+            let valid = false;
+            try {
+                // verify the entered JS is valid - new Function over exec because we don't want to actually execute the code
+                new Function(codeInput.value);
+                valid = true;
+            } catch (error) {
+                // TODO: possible to bring in a library that finds what's invalid? Maybe the error is enough...
+                alert(error);
+            }
+            const testName = document.querySelector('#test-name').value;
+            const s3Params = {
+                Bucket: 'canary-upload',
+                Key: `tests/${testName}.js`, 
+                Body: JSON.stringify(codeInput.value)
+            }
+            if (valid) {
+
+                try {
+                    const s3 = new AWS.S3();
+                    await s3.upload(s3Params).promise();
+                    const s3TagParams = {
+                        Bucket: 'canary-upload',
+                        Key: `tests/${testName}.js`, 
+                        Tagging: {
+                            TagSet: [
+                                {Key: 'Billing', Value: 'SEO-Sonar'}, 
+                                {Key: 'Product', Value: 'Sonar-Canary'}
+                            ] 
+                        }
+                    }
+                    
+                    await s3.putObjectTagging(s3TagParams).promise()
+                } catch (error) {
+                    // TODO: modal instead of alert
+                    alert(error)
+                }
+            }
+        })
+    </script>
+
+
+
+</html>

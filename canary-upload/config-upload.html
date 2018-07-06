@@ -1,0 +1,189 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/handsontable/3.0.0/handsontable.min.css">
+    <link href="../css/styles.css" rel="stylesheet" type="text/css">
+    <style>
+    </style>
+    <title>Test</title>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.248.1.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <img id="wheelhouselogo" src="../img/Wheelhouse-Logo-RGB.png">
+        <div class="row">
+            <div class="col-sm-3" id="leftPanel">
+                <form id="main-form">
+                    <div class="form-group">
+                        <h5 id="heading">On boarding Message</h5>
+                        <label for="clientNameInput">Client Name</label>
+                        <input type="text" class="form-control" id="config-client-name" placeholder="Providence">
+                    </div>
+                    <div class="form-group">
+                        <label for="projectNameInput">Project</label>
+                        <input type="text" class="form-control" id="config-project" placeholder="CPROVSEO">
+                    </div>
+                    <div class="form-group">
+                        <label for="folderNameInput">Folder</label>
+                        <input type="text" class="form-control" id="config-folder" placeholder="CPROVSEO-1111">
+                    </div>
+                    <label for="NameInput">Name</label>
+                    <input type="text" class="form-control" id="username-input" aria-describedby="nameHelp" placeholder="Name">
+                    <small id="nameHelp" class="form-text text-muted">@wheelhousedmg.com</small>
+                    <br />
+
+                    <!-- Checkbox reflects status of the active column in the database -->
+                    <input type="checkbox" id="active-checkbox">Active
+
+                    <!-- configList will be populated asynchronously -->
+                    <div id="configList">
+                        <h4>Loading configs...</h4>
+                    </div>
+
+                    <button type="button" id="submit-button" class="btn btn-outline-success submit-button">Submit</button>
+                    <br />
+                    <button type="button" class="btn btn-outline-info help-button" data-toggle="modal" data-target="#help-modal">?</button>
+                </form>
+            </div>
+
+            <div class="col-sm-9" id="rightPanel">
+                <div id="spreadsheet">
+                    <!-- This is where the spreadsheet is inserted -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <br />
+    <!-- Button trigger modal -->
+
+    <!-- Modal -->
+    <div class="modal fade" id="help-modal" tabindex="-1" role="dialog" aria-labelledby="help-modal-title" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="help-modal-title">Help</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h4>
+                        <em>File name notes:</em>
+                    </h4>
+                    <ul class="list-group">
+                        <li class="list-group-item">Must be in format of "Client Name - JIRA project - Sub-denotation"</li>
+                        <li class="list-group-item">Example: "Wheelhouse DMG - WHIT - WHIT-10"</li>
+                        <li class="list-group-item">If there is no JIRA ticket associated with the checks, you can give it any name. That said, we hope
+                            to possibly have some JIRA integration so it would be very helpful if there was a ticket associated
+                            with the checks.</li>
+                        <li class="list-group-item">Items will be grouped in the dashboards by client name, so it would be recommended to use their full
+                            name. Wheelhouse DMG instead of WH. Providence instead of Prov</li>
+                        <li class="list-group-item">Another example: "Providence - CPRVRII - CPRVRII-62"</li>
+                    </ul>
+
+                    <h4>
+                        <em>Elements notes</em>
+                    </h4>
+                    <ul class="list-group">
+                        <li class="list-group-item">To get the CSS selector, you follow the same steps as getting an X-Path</li>
+                        <li class="list-group-item">Find element on page, right click and choose "Inspect", then in the console find your item, right
+                            click and hover over "Copy", then click "Copy selector"</li>
+                        <li class="list-group-item">You MUST name your element selections</li>
+                    </ul>
+
+                    <h4>
+                        <em>Custom JS Tests Notes</em>
+                    </h4>
+                    <ul class="list-group">
+                        <li class="list-group-item">You MUST name your Custom JS tests</li>
+                        <li class="list-group-item">Custom JS Tests will be submitted separately</li>
+                        <li class="list-group-item">Custom JS tests can be almost anything, as long as the library and methods are available in the scraper
+                            (IE don't expect jQuery and moment and whatever other third party library to work)</li>
+                    </ul>
+
+                    <h4>
+                        <em>RegEx Notes</em>
+                    </h4>
+                    <ul class="list-group">
+                        <li class="list-group-item">You MUST name your regex tests</li>
+                        <li class="list-group-item">Validate your RegEx BEFOREHAND. We cannot validate the RegEx for you. The system will report on the
+                            RegEx, whether it is correct or not. Use something like regexr.com to make sure things are correct</li>
+                    </ul>
+
+                    <h4>
+                        <em>Other notes:</em>
+                    </h4>
+                    <ul class="list-group">
+                        <li class="list-group-item">URLs are not required to have https://www, though it is suggested to at least include https:// with
+                            each one</li>
+                        <li class="list-group-item">There are several other tests that will be run by default: canonical, meta keywords, meta description,
+                            title of the page, and load time. If you're unsure whether you should create an element or custom
+                            JS test for an item, reach out to Dallas</li>
+                        <li class="list-group-item">Robots files should be submitted as their own line. You can include additional JS or RegEx tests
+                            on the robots files</li>
+                        <li class="list-group-item">This file will need to ALWAYS be a UTF-8 encoded CSV - in Excel you can select UTF-8 CSV in the "Save
+                            As" menu</li>
+                        <li class="list-group-item">Any other format or encoding will result in your URLs not being processed.</li>
+                        <li class="list-group-item">It is your responsibility to ensure that the URLs in question areset up properly (white/black listing
+                            for client/GA, etc)</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- <div class="modal" id="sign-in-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Please Sign In</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+
+                    <label for="password-input">Password</label>
+                    <div class="input-group mb-3">
+                        <input type="password" class="form-control" id="password-input" aria-describedby="basic-addon3">
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="login-button">Login</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" id="cancel-button">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+
+</body>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/handsontable/3.0.0/handsontable.min.js"></script>
+
+<!-- getting previous configs -->
+<script src="./js/config-loader.js" > </script>
+<!-- building the table -->
+<script src="./js/table-controller.js" ></script>
+<!-- submit form to server -->
+<script src="./js/submit-controller.js" ></script>
+   
+</html>
